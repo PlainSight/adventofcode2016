@@ -20,14 +20,9 @@ for(var i = 2; i <= numberOfElves; i++) {
 lastElf.next = firstElf;
 firstElf.last = lastElf;
 
-var currentElf = firstElf;
-
 var population = numberOfElves;
 
-while(currentElf.next != currentElf) {
-    //console.log('current', currentElf.number, 'next', currentElf.next.number, 'last', currentElf.last.number);
-    //console.log('killing', acrossElf.number, 'next', acrossElf.next.number, 'last', acrossElf.last.number);
-
+while(acrossElf.next != acrossElf) {
     acrossElf.last.next = acrossElf.next;
     acrossElf.next.last = acrossElf.last;
 
@@ -35,8 +30,7 @@ while(currentElf.next != currentElf) {
         acrossElf = acrossElf.next;
     }
     acrossElf = acrossElf.next;
-    currentElf = currentElf.next;
     population--;
 }
 
-console.log('done', currentElf);
+console.log('done', acrossElf);

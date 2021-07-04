@@ -1,3 +1,44 @@
 var fs = require('fs');
 
 var input = fs.readFileSync('./input.txt', 'utf8').split('\r\n');
+// Filesystem              Size  Used  Avail  Use%
+// /dev/grid/node-x0-y0     92T   72T    20T   78%
+
+var cap = /\/dev\/grid\/node-x(\d+)-y(\d+)\s+(\d+)T\s+(\d+)T\s+(\d+)T\s+(\d+)%/;
+
+var nodes = [];
+
+for(var i = 0; i < input.length; i++) {
+    if (cap.test(input[i])) {
+        var vals = cap.exec(input[i]);
+        var x = parseInt(vals[1]);
+        var y = parseInt(vals[2]);
+        var used = parseInt(vals[4]);
+        var avail = parseInt(vals[5]);
+        nodes.push({ x: x, y: y, used: used, avail: avail });
+    }
+}
+
+for (var i = 0; i < nodes.length; i++) {
+    for (var j = 0; j < nodes.length; j++) {
+        if (i != j && nodes[i].used > 0 && nodes[i].used <= nodes[j].avail) {
+            nodes[i].usable = true;
+            nodes[j].usable = true;
+        }
+    }
+}
+
+console.log(nodes.length);
+
+nodes = nodes.filter(n => n.usable);
+
+console.log(nodes.length);
+
+
+var highestXNode = nodes.filter(n => n.y == 0).sort((a,b) => b.x - a.x)[0];
+
+console.log(highestXNode);
+
+// A-star
+
+// g- state number of moves h-0000 distance data is from dest

@@ -28,17 +28,98 @@ for (var i = 0; i < nodes.length; i++) {
     }
 }
 
-console.log(nodes.length);
+var targetLocation = { x: Math.max(...nodes.map(n => n.x)), y: 0 };
+var blocks = nodes.filter(n => !n.usable).reduce((a, c) => {
+    a[c.x+','+c.y] = true;
+    return a;
+}, {});
+var emptyLocation = nodes.sort((a, b) => b.avail - a.avail).map(n => { return { x: n.x, y: n.y }})[0];
 
-nodes = nodes.filter(n => n.usable);
+var minX = 0;
+var minY = 0;
+var maxX = Math.max(...nodes.map(n => n.x));
+var maxY = Math.max(...nodes.map(n => n.y));
 
-console.log(nodes.length);
+console.log(targetLocation, blocks, emptyLocation);
 
+var seenStates = {};
 
-var highestXNode = nodes.filter(n => n.y == 0).sort((a,b) => b.x - a.x)[0];
+var startState = {
+    dx: targetLocation.x,
+    dy: targetLocation.y,
+    ex: emptyLocation.x,
+    ey: emptyLocation.y
+};
 
-console.log(highestXNode);
+function key(state) {
+    return state.dx+','+state.dy+','+state.ex+','+state.ey;
+}
 
-// A-star
+function findMoves(state) {
+    // we can swap the emptyLocation with any position (in bounds) that is not a block
+    // if this is the datalocation the datalocation is swapped with the empty location
 
-// g- state number of moves h-0000 distance data is from dest
+    var moves = [];
+
+    [
+        [0, 1],
+        [0, -1],
+        [1, 0],
+        [-1, 0]
+    ].forEach(d => {
+        var ex = state.ex + d[0];
+        var ey = state.ey + d[1];
+        if (ex >= minX && ex <= maxX && ey >= minY && ey <= maxY) {
+            if (!blocks[ex+','+ey]) {
+                if (state.dx == ex && state.dy == ey) {
+                    moves.push({
+                        dx: state.ex,
+                        dy: state.ey,
+                        ex: ex,
+                        ey: ey
+                    });
+                } else {
+                    moves.push({
+                        dx: state.dx,
+                        dy: state.dy,
+                        ex: ex,
+                        ey: ey
+                    });
+                }
+            }
+        }
+    });
+
+    return moves.filter(m => {
+        if (!seenStates[key(m)]) {
+            seenStates[key(m)] = true;
+            return true;
+        }
+        return false;
+    });
+}
+
+var states = [startState];
+
+seenStates[key(startState)] = true;
+
+var step = 0;
+
+while (true) {
+    if (states.filter(s => s.dx == minX && s.dy == minY).length > 0) {
+        break;
+    }
+
+    step++;
+    var newStates = [];
+
+    states.forEach(s => {
+        newStates.push(...findMoves(s));
+    });
+
+    //console.log(step, newStates);
+
+    states = newStates;
+}
+
+console.log(step);
